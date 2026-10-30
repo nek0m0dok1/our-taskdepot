@@ -1,0 +1,28 @@
+name: 開発タスク
+description: 1〜3日を目安に取り組む作業と完了条件を共有します。
+body:
+  - type: textarea
+    id: task
+    attributes:
+      label: 作業内容
+      description: 何をするかと、その目的を書いてください。
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 対象と担当間の連携
+      description: 対象ファイルやモジュール、事前に相談が必要な公開関数などを書いてください。
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 完了条件
+      description: 動作やテストで確認できる条件をチェックリストにしてください。
+      placeholder: "- [ ] 対象の処理を実装し、関連テストが成功する"
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: 関連資料
+      description: 関連するADR・Issue・仕様書へのリンクを書いてください。

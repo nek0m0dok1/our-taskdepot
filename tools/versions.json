@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "tools": {
+    "git": {
+      "version": "2.50.1.windows.1",
+      "url": "https://github.com/git-for-windows/git/releases/download/v2.50.1.windows.1/MinGit-2.50.1-64-bit.zip",
+      "sha256": "6f672aebe9e488a246efd6875f9197dbc0d9a40100e218acc3877cba2b206c45",
+      "provenance": "https://github.com/git-for-windows/git/releases/expanded_assets/v2.50.1.windows.1",
+      "archiveType": "zip",
+      "installPath": "git",
+      "stripTopLevel": false,
+      "executables": { "git": "cmd/git.exe" },
+      "versionArguments": { "git": ["--version"] }
+    },
+    "python": {
+      "version": "3.13.7",
+      "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20250818/cpython-3.13.7%2B20250818-x86_64-pc-windows-msvc-install_only.tar.gz",
+      "sha256": "95258d68b4857873035201f86dfdfc6fcfeb311c8b9ba4610e54e9f9c5604b06",
+      "provenance": "https://github.com/astral-sh/python-build-standalone/releases/expanded_assets/20250818",
+      "archiveType": "tar.gz",
+      "installPath": "python",
+      "stripTopLevel": true,
+      "executables": { "python": "python.exe" },
+      "versionArguments": { "python": ["-c", "import sys; print('.'.join(map(str, sys.version_info[:3])))"] }
+    },
+    "cmake": {
+      "version": "3.31.8",
+      "url": "https://github.com/Kitware/CMake/releases/download/v3.31.8/cmake-3.31.8-windows-x86_64.zip",
+      "sha256": "81aa9964dbabd71fe02e7ec50472fd3ad56138c49944515ece9001efbff8d719",
+      "provenance": "https://github.com/Kitware/CMake/releases/expanded_assets/v3.31.8",
+      "archiveType": "zip",
+      "installPath": "cmake",
+      "stripTopLevel": true,
+      "executables": { "cmake": "bin/cmake.exe", "ctest": "bin/ctest.exe" },
+      "versionArguments": { "cmake": ["--version"], "ctest": ["--version"] }
+    },
+    "ninja": {
+      "version": "1.13.1",
+      "url": "https://github.com/ninja-build/ninja/releases/download/v1.13.1/ninja-win.zip",
+      "sha256": "26a40fa8595694dec2fad4911e62d29e10525d2133c9a4230b66397774ae25bf",
+      "provenance": "https://github.com/ninja-build/ninja/releases/expanded_assets/v1.13.1",
+      "archiveType": "zip",
+      "installPath": "ninja",
+      "stripTopLevel": false,
+      "executables": { "ninja": "ninja.exe" },
+      "versionArguments": { "ninja": ["--version"] }
+    },
+    "clangFormat": {
+      "version": "20.1.8",
+      "url": "https://files.pythonhosted.org/packages/bd/ee/656287efdf58dccc7a7299fab547fe1313b49ca1ea1607ea475b262d640f/clang_format-20.1.8-py2.py3-none-win_amd64.whl",
+      "sha256": "346ac8cab571eaba4d6b89dfa30fdbbc512db82a66ab0eeb1763cacc5977e325",
+      "provenance": "https://pypi.org/pypi/clang-format/20.1.8/json",
+      "archiveType": "wheel",
+      "installPath": "clang-format",
+      "stripTopLevel": false,
+      "executables": { "clang-format": "clang_format/data/bin/clang-format.exe" },
+      "versionArguments": { "clang-format": ["--version"] }
+    },
+    "clangTidy": {
+      "version": "21.1.6",
+      "url": "https://files.pythonhosted.org/packages/4b/ed/26fbf1a0847ccd424f5a270d851b3b726e17d7eaebefbf58fff8191bdf81/clang_tidy-21.1.6-py2.py3-none-win_amd64.whl",
+      "sha256": "8f29fbc3e8aa0552810dd0e3e69f3158f8dbf0edb425e0437798e9db9d0a28a6",
+      "provenance": "https://pypi.org/pypi/clang-tidy/21.1.6/json",
+      "archiveType": "wheel",
+      "installPath": "clang-tidy",
+      "stripTopLevel": false,
+      "executables": { "clang-tidy": "clang_tidy/data/bin/clang-tidy.exe" },
+      "versionArguments": { "clang-tidy": ["--version"] }
+    },
+    "llvmMingw": {
+      "version": "20261020",
+      "url": "https://github.com/mstorsjo/llvm-mingw/releases/download/20261020/llvm-mingw-20261020-ucrt-x86_64.zip",
+      "sha256": "fd5462b7f5d93b2ff981fcd3f9c7e427e47f3203c64ea91c27bcc444eebd74cd",
+      "provenance": "https://github.com/mstorsjo/llvm-mingw/releases/expanded_assets/20261020",
+      "archiveType": "zip",
+      "installPath": "llvm-mingw",
+      "stripTopLevel": true,
+      "executables": { "clang": "bin/clang.exe" },
+      "versionArguments": { "clang": ["--version"] },
+      "versionPattern": { "clang": "^clang version 23\\.1\\.4(?:\\s|$)" }
+    },
+    "scintilla": {
+      "version": "5.6.7",
+      "url": "https://www.scintilla.org/wscite567.zip",
+      "sha256": "24b6c63fc61d8fb57b782bac6149352dde262212a9588367bde4b2def599f353",
+      "provenance": "https://raw.githubusercontent.com/ScoopInstaller/Extras/master/bucket/scite.json",
+      "archiveType": "zip",
+      "installPath": "scintilla",
+      "stripTopLevel": false,
+      "executables": { "scintilla": "wscite/Scintilla.dll" },
+      "fileValidation": { "scintilla": "pe64-version" }
+    }
+  },
+  "libraries": {
+    "cjson": {
+      "version": "1.7.19",
+      "url": "https://github.com/DaveGamble/cJSON/archive/v1.7.19.tar.gz",
+      "sha256": "7fa616e3046edfa7a28a32d5f9eacfd23f92900fe1f8ccd988c1662f30454562",
+      "provenance": "https://raw.githubusercontent.com/conan-io/conan-center-index/master/recipes/cjson/all/conandata.yml"
+    },
+    "unity": {
+      "version": "2.6.0",
+      "url": "https://github.com/ThrowTheSwitch/Unity/archive/refs/tags/v2.6.0.tar.gz",
+      "sha256": "aa4c9fb1ae5fc5242f914c65f3557e817e40cb37f04a31e5ff76d1ab89dbf674",
+      "provenance": "https://raw.githubusercontent.com/conan-io/conan-center-index/master/recipes/unity/all/conandata.yml"
+    }
+  },
+  "preCommit": { "version": "4.3.0" }
+}

@@ -1,2 +1,20 @@
-# docs
+# Per-checkout downloads, toolchains, Python environment, and logs
+.setup/
+.tools/
+
+# Instruction and decision files supplied outside the tracked project
 0010-code-quality-automation.md
+dev-prepare.md
+.agents/
+
+# CMake/Ninja build output
+/build/
+/out/
+CMakeUserPresets.json
+
+# Editor and operating system state
+.vs/
+.vscode/*.user
+*.swp
+Thumbs.db
+Desktop.ini

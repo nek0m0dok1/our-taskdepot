@@ -1,0 +1,13 @@
+
+{
+  "cmake.cmakePath": "${workspaceFolder}/.tools/cmake/bin/cmake.exe",
+  "clang-format.executable.windows": "${workspaceFolder}/.tools/clang-format/clang_format/data/bin/clang-format.exe",
+  "[c]": {
+    "editor.defaultFormatter": "xaver.clang-format",
+    "editor.formatOnSave": true
+  },
+  "[cpp]": {
+    "editor.defaultFormatter": "xaver.clang-format",
+    "editor.formatOnSave": true
+  }
+}

@@ -1,0 +1,33 @@
+name: Windows development foundation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: foundation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    name: Windows x64 tools, formatting, build, and tests
+    runs-on: windows-2025
+    timeout-minutes: 60
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Provision pinned tools and run configure, build, CTest, and clang-tidy
+        shell: powershell
+        run: .\scripts\setup.ps1 -SkipHostOSCheck
+
+      - name: Run pre-commit checks on every tracked file
+        shell: powershell
+        run: .\.setup\venv\Scripts\python.exe -m pre_commit run --all-files --show-diff-on-failure
