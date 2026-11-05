@@ -45,6 +45,7 @@ typedef struct {
   unsigned int timeout_ms;      // コンパイル処理の許容時間(ms)
 } CompileOptions;
 
+// コンパイル結果を返す関数
 CompileResult compile_source(const char *source, const CompileOptions *options);
 
 #endif
