@@ -6,6 +6,9 @@
 
 // ヘッダファイル
 #include "compiler/compiler.h"
+
+#include <Windows.h>
+#include <minwindef.h>
 #include <stdlib.h>
 
 // resultが占有する動的メモリの解放処理
@@ -24,6 +27,7 @@ void compile_result_free(CompileResult *result) {
   result->output_path = NULL;
 }
 
+// 引数検証
 CompileResult compile_source(const char *source, const CompileOptions *options) {
 
   // インスタンスメンバ初期化
@@ -39,5 +43,15 @@ CompileResult compile_source(const char *source, const CompileOptions *options) 
     return result;
   }
 
+  return result;
+}
+
+// 一時フォルダを取得する処理
+wchar_t temp_dir[MAX_PATH + 1]; // フォルダパス書込み用配列
+// 配列にパスを書き込み
+DWORD length = GetTempPath2W(MAX_PATH + 1, temp_dir);
+// 取得時の内部エラー
+if (length == 0 || length >= MAX_PATH + 1) {
+  result.status = COMPILE_INTERNAL_ERROR;
   return result;
 }
