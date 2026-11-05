@@ -3,6 +3,7 @@
 
 #include "compiler/compiler.h"
 #include "unity.h"
+#include "unity_internals.h"
 
 static CompileResult result;
 
@@ -11,7 +12,19 @@ void setUp(void) {
 }
 
 void tearDown(void) {
-  // Assertions that return early still leave allocations for this cleanup.
+  compile_result_free(&result);
+}
+
+void test_compile_source_null_source(void) {
+  CompileOptions options = {0};
+
+  options.compiler_path = L"C:\\compiler\\clang.exe";
+  options.timeout_ms = 5000;
+
+  CompileResult result = compile_source(NULL, &options);
+
+  TEST_ASSERT_EQUAL_INT(COMPILE_INVALID_ARGUMENT, result.status);
+
   compile_result_free(&result);
 }
 
@@ -78,5 +91,6 @@ int main(void) {
   RUN_TEST(test_compile_result_free_clears_output_path);
   RUN_TEST(test_compile_result_free_clears_both_members);
   RUN_TEST(test_compile_result_free_can_be_called_repeatedly);
+  RUN_TEST(test_compile_source_null_source);
   return UNITY_END();
 }
