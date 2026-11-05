@@ -7,3 +7,7 @@ add_custom_command(TARGET foundation_smoke POST_BUILD
   VERBATIM
 )
 add_test(NAME foundation_smoke COMMAND foundation_smoke "$<TARGET_FILE_DIR:foundation_smoke>/Scintilla.dll")
+
+add_executable(compiler_tests test_compiler.c)
+target_link_libraries(compiler_tests PRIVATE compiler unity)
+add_test(NAME compiler_tests COMMAND compiler_tests)
