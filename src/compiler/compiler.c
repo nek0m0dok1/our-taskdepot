@@ -8,6 +8,7 @@
 #include "compiler/compiler.h"
 
 #include <Windows.h>
+#include <corecrt_search.h>
 #include <minwindef.h>
 #include <stdlib.h>
 
@@ -37,9 +38,8 @@ CompileResult compile_source(const char *source, const CompileOptions *options) 
   result.status = COMPILE_INTERNAL_ERROR;
 
   // 不正な引数の判定・記録
-  if (source == NULL || options == NULL || options->compiler_path == NULL) {
+  if (source == NULL) {
     result.status = COMPILE_INVALID_ARGUMENT;
-
     return result;
   }
 
