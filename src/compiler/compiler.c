@@ -23,3 +23,21 @@ void compile_result_free(CompileResult *result) {
   result->diagnostics = NULL;
   result->output_path = NULL;
 }
+
+CompileResult compile_source(const char *source, const CompileOptions *options) {
+
+  // インスタンスメンバ初期化
+  CompileResult result = {0};
+
+  // result初期状態
+  result.status = COMPILE_INTERNAL_ERROR;
+
+  // 不正な引数の判定・記録
+  if (source == NULL || options == NULL || options->compiler_path == NULL) {
+    result.status = COMPILE_INVALID_ARGUMENT;
+
+    return result;
+  }
+
+  return result;
+}
