@@ -9,6 +9,8 @@
 
 #include <Windows.h>
 #include <corecrt_search.h>
+#include <handleapi.h>
+#include <jobapi2.h>
 #include <minwindef.h>
 #include <objbase.h>
 #include <processthreadsapi.h>
@@ -42,6 +44,30 @@ static int ensure_app_temp_dir(const wchar_t *path) {
   }
 
   return 1;
+}
+
+// 補助関数：Clang用JobObject作成
+static HANDLE create_compiler_job(void) {
+  HANDLE job = CreateJobObjectW(NULL, NULL);
+
+  if (job == NULL) {
+    return NULL;
+  }
+
+  // 最後のハンドルを閉じたときに関連するプレセスを終了
+  JOBOBJECT_EXTENDED_LIMIT_INFORMATION info = {0};
+
+  info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+
+  BOOL configured =
+      SetInformationJobObject(job, JobObjectExtendedLimitInformation, &info, sizeof(info));
+
+  if (!configured) {
+    CloseHandle(job);
+    return NULL;
+  }
+
+  return job;
 }
 
 // resultが占有する動的メモリの解放処理
@@ -235,6 +261,15 @@ CompileResult compile_source(const char *source, const CompileOptions *options) 
   if (FAILED(command_hr)) {
     return result;
   }
+
+  /*構造体初期化*/
+  // プロセスの起動設定
+  STARTUPINFOW startup_info = {0};
+  // 起動したプロセスの情報
+  PROCESS_INFORMATION process_info = {0};
+
+  // 構造体のサイズ設定
+  startup_info.cb = sizeof(startup_info);
 
   return result;
 }
