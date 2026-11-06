@@ -8,12 +8,15 @@
 #include "compiler/compiler.h"
 
 #include <Windows.h>
+#include <corecrt_search.h>
+#include <minwindef.h>
 #include <objbase.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strsafe.h>
 #include <wchar.h>
+#include <winnt.h>
 
 // 補助関数：一時ファイル作成
 static int ensure_app_temp_dir(const wchar_t *path) {
@@ -59,6 +62,9 @@ void compile_result_free(CompileResult *result) {
 // コンパイル処理
 CompileResult compile_source(const char *source, const CompileOptions *options) {
 
+  const wchar_t *compiler_path = NULL;
+  wchar_t bundled_path[MAX_PATH + 1];
+
   // インスタンスメンバ初期化
   CompileResult result = {0};
 
@@ -97,6 +103,17 @@ CompileResult compile_source(const char *source, const CompileOptions *options) 
 
     // 終端文字書込み
     *last_separator = L'\0';
+
+    // 同梱するClangのパス組み立て
+    HRESULT compiler_hr = StringCchPrintfW(bundled_path, _countof(bundled_path),
+                                           L"%ls\\compiler\\bin\\clang.exe", exe_path);
+
+    if (FAILED(compiler_hr)) {
+      return result;
+    }
+
+    // compiler_pathにClangのパスを渡す
+    compiler_path = bundled_path;
   }
 
   // 一時フォルダを取得する処理
