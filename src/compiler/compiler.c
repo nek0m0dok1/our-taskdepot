@@ -18,7 +18,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strsafe.h>
+#include <synchapi.h>
 #include <wchar.h>
+#include <winbase.h>
 #include <winnt.h>
 
 // 補助関数：一時ファイル作成
@@ -268,6 +270,54 @@ CompileResult compile_source(const char *source, const CompileOptions *options) 
 
   // 構造体のサイズ設定
   startup_info.cb = sizeof(startup_info);
+
+  // JobObjectを作成(補助関数呼び出し)
+  HANDLE job = create_compiler_job();
+
+  if (job == NULL) {
+    return result;
+  }
+
+  // プロセス作成
+  BOOL created = CreateProcessW(compiler_path, command_line, NULL, NULL, FALSE, CREATE_SUSPENDED,
+                                NULL, work_dir, &startup_info, &process_info);
+
+  if (!created) {
+    result.status = COMPILE_LAUNCH_ERROR;
+    goto cleanup;
+  }
+
+  // ClangをJob Objectに登録
+  BOOL assigned = AssignProcessToJobObject(job, process_info.hProcess);
+
+  if (!assigned) {
+    result.status = COMPILE_LAUNCH_ERROR;
+    goto cleanup;
+  }
+
+  // ハンドルを閉じる
+  goto cleanup;
+
+// 後片付けの共通処理
+cleanup:
+  // 終了要求
+  if (process_info.hProcess != NULL) {
+    TerminateProcess(process_info.hProcess, 1);
+    WaitForSingleObject(process_info.hProcess, INFINITE);
+  }
+
+  // スレッドハンドルを閉じる
+  if (process_info.hThread != NULL) {
+    CloseHandle(process_info.hThread);
+  }
+
+  // プロセスハンドルを閉じる
+  if (process_info.hProcess != NULL) {
+    CloseHandle(process_info.hProcess);
+  }
+
+  // Job Objectを閉じる
+  CloseHandle(job);
 
   return result;
 }
