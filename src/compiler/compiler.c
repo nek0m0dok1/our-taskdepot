@@ -11,6 +11,7 @@
 #include <corecrt_search.h>
 #include <minwindef.h>
 #include <objbase.h>
+#include <processthreadsapi.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -213,13 +214,25 @@ CompileResult compile_source(const char *source, const CompileOptions *options) 
     return result;
   }
 
-  // 出力パス
+  // 出力パス生成
   wchar_t output_path[MAX_PATH + 1]; // 実行ファイル生成場所
 
   HRESULT output_hr =
       StringCchPrintfW(output_path, _countof(output_path), L"%ls\\output.exe", work_dir);
 
   if (FAILED(output_hr)) {
+    return result;
+  }
+
+  // Clangに渡すコマンドライン
+  wchar_t command_line[4 * (MAX_PATH + 1)];
+
+  // コマンドを文字配列に格納
+  HRESULT command_hr = StringCchPrintfW(command_line, _countof(command_line),
+                                        L"\"%ls\" -std=c23 -Wall -Wextra \"%ls\" -o \"%ls\"",
+                                        compiler_path, source_path, output_path);
+
+  if (FAILED(command_hr)) {
     return result;
   }
 
