@@ -89,9 +89,6 @@ void compile_result_free(CompileResult *result) {
 // コンパイル処理
 CompileResult compile_source(const char *source, const CompileOptions *options) {
 
-  const wchar_t *compiler_path = NULL;
-  wchar_t bundled_path[MAX_PATH + 1];
-
   // インスタンスメンバ初期化
   CompileResult result = {0};
 
@@ -104,8 +101,9 @@ CompileResult compile_source(const char *source, const CompileOptions *options) 
     return result;
   }
 
-  // コンパイラのパスを取得
+  // 各種パスを取得
   const wchar_t *compiler_path = NULL;
+  wchar_t bundled_path[MAX_PATH + 1];
 
   if (options != NULL) { // ユーザーからのパス指定あり
     compiler_path = options->compiler_path;
