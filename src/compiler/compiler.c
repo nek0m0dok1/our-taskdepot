@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strsafe.h>
+#include <wchar.h>
 
 // 補助関数：一時ファイル作成
 static int ensure_app_temp_dir(const wchar_t *path) {
@@ -86,6 +87,16 @@ CompileResult compile_source(const char *source, const CompileOptions *options) 
     if (exe_length == 0 || exe_length >= _countof(exe_path)) {
       return result;
     }
+
+    // 格納された実行ファイルパスからファイル部分を除去(≠消去)
+    wchar_t *last_separator = wcsrchr(exe_path, L'\\');
+
+    if (last_separator == NULL) {
+      return result;
+    }
+
+    // 終端文字書込み
+    *last_separator = L'\0';
   }
 
   // 一時フォルダを取得する処理
