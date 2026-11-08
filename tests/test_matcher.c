@@ -129,6 +129,35 @@ void test_first_pattern_on_tie(void) {
   TEST_ASSERT_EQUAL_STRING("first", result.matched_pattern->id);
 }
 
+/* 実際のClang診断メッセージを照合する */
+void test_real_clang_diagnostic(void) {
+  const char *message = "use of undeclared identifier 'missing_value'";
+
+  ErrorPattern patterns[] = {{"undeclared-identifier", "use of undeclared identifier",
+                              "未宣言の識別子です", "変数名や宣言を確認してください", 10}};
+
+  MatchResult result = match_error(message, patterns, 1);
+
+  TEST_ASSERT_EQUAL(MATCH_FOUND, result.status);
+  TEST_ASSERT_NOT_NULL(result.matched_pattern);
+  TEST_ASSERT_EQUAL_STRING("undeclared-identifier", result.matched_pattern->id);
+  TEST_ASSERT_EQUAL_STRING(message, result.original_message);
+}
+
+/* 類似した診断でもパターンが一致しなければ未対応とする */
+void test_similar_diagnostic_unsupported(void) {
+  const char *message = "use of undeclared identifier 'missing_value'";
+
+  ErrorPattern patterns[] = {{"undeclared-function", "call to undeclared function",
+                              "未宣言の関数です", "関数の宣言を確認してください", 10}};
+
+  MatchResult result = match_error(message, patterns, 1);
+
+  TEST_ASSERT_EQUAL(MATCH_UNSUPPORTED, result.status);
+  TEST_ASSERT_NULL(result.matched_pattern);
+  TEST_ASSERT_EQUAL_STRING(message, result.original_message);
+}
+
 /* テストを順番に実行 */
 int main(void) {
   UNITY_BEGIN();
@@ -144,6 +173,8 @@ int main(void) {
   RUN_TEST(test_skip_invalid_patterns);
   RUN_TEST(test_priority_over_length);
   RUN_TEST(test_first_pattern_on_tie);
+  RUN_TEST(test_real_clang_diagnostic);
+  RUN_TEST(test_similar_diagnostic_unsupported);
 
   return UNITY_END();
 }
