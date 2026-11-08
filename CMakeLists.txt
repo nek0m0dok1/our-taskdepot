@@ -14,3 +14,9 @@ include(cmake/Dependencies.cmake)
 if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
+add_executable(taskdepot_gui WIN32
+src/main.c
+src/mock_compile.c
+)
+
+target_link_libraries(taskdepot_gui PRIVATE user32)
