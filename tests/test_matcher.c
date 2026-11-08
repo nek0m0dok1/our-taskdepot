@@ -22,11 +22,8 @@ void test_pattern_found(void) {
 
   TEST_ASSERT_EQUAL(MATCH_FOUND, result.status);
   TEST_ASSERT_NOT_NULL(result.matched_pattern);
-
   TEST_ASSERT_EQUAL_STRING("missing-semicolon", result.matched_pattern->id);
-
   TEST_ASSERT_EQUAL_STRING("セミコロンが必要です", result.matched_pattern->explanation);
-
   TEST_ASSERT_EQUAL_STRING("直前の文末を確認してください", result.matched_pattern->cause);
 }
 
@@ -35,12 +32,10 @@ void test_unsupported_error(void) {
   ErrorPattern patterns[] = {{"missing-semicolon", "expected ';'", "説明", "原因", 10}};
 
   const char *message = "unknown diagnostic";
-
   MatchResult result = match_error(message, patterns, 1);
 
   TEST_ASSERT_EQUAL(MATCH_UNSUPPORTED, result.status);
   TEST_ASSERT_NULL(result.matched_pattern);
-
   TEST_ASSERT_EQUAL_STRING(message, result.original_message);
 }
 
@@ -66,7 +61,7 @@ void test_priority(void) {
   MatchResult result = match_error("expected ';' before 'return'", patterns, 2);
 
   TEST_ASSERT_EQUAL(MATCH_FOUND, result.status);
-
+  TEST_ASSERT_NOT_NULL(result.matched_pattern);
   TEST_ASSERT_EQUAL_STRING("specific", result.matched_pattern->id);
 }
 
@@ -78,6 +73,7 @@ void test_longer_pattern(void) {
   MatchResult result = match_error("expected ';' before 'return'", patterns, 2);
 
   TEST_ASSERT_EQUAL(MATCH_FOUND, result.status);
+  TEST_ASSERT_NOT_NULL(result.matched_pattern);
   TEST_ASSERT_EQUAL_STRING("long", result.matched_pattern->id);
 }
 
@@ -95,6 +91,44 @@ void test_invalid_pattern_array(void) {
   TEST_ASSERT_EQUAL(MATCH_INVALID_INPUT, result.status);
 }
 
+/* 無効なパターンを無視して有効なパターンを選ぶ */
+void test_skip_invalid_patterns(void) {
+  ErrorPattern patterns[] = {{NULL, "expected", "説明", "原因", 100},
+                             {"null-pattern", NULL, "説明", "原因", 100},
+                             {"empty-pattern", "", "説明", "原因", 100},
+                             {"valid", "expected ';'", "説明", "原因", 10}};
+
+  MatchResult result = match_error("expected ';' before 'return'", patterns, 4);
+
+  TEST_ASSERT_EQUAL(MATCH_FOUND, result.status);
+  TEST_ASSERT_NOT_NULL(result.matched_pattern);
+  TEST_ASSERT_EQUAL_STRING("valid", result.matched_pattern->id);
+}
+
+/* 文字列の長さより優先順位を重視する */
+void test_priority_over_length(void) {
+  ErrorPattern patterns[] = {{"long", "expected ';'", "説明", "原因", 1},
+                             {"high-priority", "expected", "説明", "原因", 10}};
+
+  MatchResult result = match_error("expected ';' before 'return'", patterns, 2);
+
+  TEST_ASSERT_EQUAL(MATCH_FOUND, result.status);
+  TEST_ASSERT_NOT_NULL(result.matched_pattern);
+  TEST_ASSERT_EQUAL_STRING("high-priority", result.matched_pattern->id);
+}
+
+/* 優先順位と文字列長が同じ場合は先に登録されたものを選ぶ */
+void test_first_pattern_on_tie(void) {
+  ErrorPattern patterns[] = {{"first", "expected", "説明", "原因", 10},
+                             {"second", "expected", "説明", "原因", 10}};
+
+  MatchResult result = match_error("expected ';' before 'return'", patterns, 2);
+
+  TEST_ASSERT_EQUAL(MATCH_FOUND, result.status);
+  TEST_ASSERT_NOT_NULL(result.matched_pattern);
+  TEST_ASSERT_EQUAL_STRING("first", result.matched_pattern->id);
+}
+
 /* テストを順番に実行 */
 int main(void) {
   UNITY_BEGIN();
@@ -107,6 +141,9 @@ int main(void) {
   RUN_TEST(test_longer_pattern);
   RUN_TEST(test_no_patterns);
   RUN_TEST(test_invalid_pattern_array);
+  RUN_TEST(test_skip_invalid_patterns);
+  RUN_TEST(test_priority_over_length);
+  RUN_TEST(test_first_pattern_on_tie);
 
   return UNITY_END();
 }
