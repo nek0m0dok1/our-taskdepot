@@ -325,48 +325,56 @@ CompileResult compile_source(const char *source, const CompileOptions *options) 
     result.exit_code = exit_code;
     result.has_exit_code = 1;
 
-    // 実行ファイルの実在を確認
-    if (exit_code == 0) {
-      DWORD attributes = GetFileAttributesW(output_path);
-
-      // 存在しない・ディレクトリの場合
-      if (attributes == INVALID_FILE_ATTRIBUTES || (attributes & FILE_ATTRIBUTE_DIRECTORY)) {
-        result.status = COMPILE_INTERNAL_ERROR;
-        goto cleanup;
-      }
+    // 終了コードが0でないならコンパイル失敗
+    if (exit_code != 0) {
+      result.status = COMPILE_ERROR;
+      goto cleanup;
     }
-  } else if (wait_result == WAIT_TIMEOUT) {
-    result.status = COMPILE_TIMEOUT;
-    goto cleanup;
-  } else {
-    goto cleanup;
+
+    // 終了コードが0なら実行ファイルの存在を確認
+    DWORD attributes = GetFileAttributesW(output_path);
+
+    if (attributes == INVALID_FILE_ATTRIBUTES || (attributes & FILE_ATTRIBUTE_DIRECTORY)) {
+      result.status = COMPILE_INTERNAL_ERROR;
+      goto cleanup;
+    }
   }
-
+}
+else if (wait_result == WAIT_TIMEOUT) {
+  result.status = COMPILE_TIMEOUT;
   goto cleanup;
-
-  // ハンドルを閉じる
+}
+else {
   goto cleanup;
+}
+
+goto cleanup;
+
+// ハンドルを閉じる
+goto cleanup;
 
 // 後片付けの共通処理
-cleanup:
-  // 終了要求
-  if (process_info.hProcess != NULL) {
+cleanup :
+    // 終了要求
+    if (process_info.hProcess != NULL) {
+  if (!process_finished) {
     TerminateProcess(process_info.hProcess, 1);
     WaitForSingleObject(process_info.hProcess, INFINITE);
   }
+}
 
-  // スレッドハンドルを閉じる
-  if (process_info.hThread != NULL) {
-    CloseHandle(process_info.hThread);
-  }
+// スレッドハンドルを閉じる
+if (process_info.hThread != NULL) {
+  CloseHandle(process_info.hThread);
+}
 
-  // プロセスハンドルを閉じる
-  if (process_info.hProcess != NULL) {
-    CloseHandle(process_info.hProcess);
-  }
+// プロセスハンドルを閉じる
+if (process_info.hProcess != NULL) {
+  CloseHandle(process_info.hProcess);
+}
 
-  // Job Objectを閉じる
-  CloseHandle(job);
+// Job Objectを閉じる
+CloseHandle(job);
 
-  return result;
+return result;
 }
