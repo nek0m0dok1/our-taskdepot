@@ -312,6 +312,17 @@ CompileResult compile_source(const char *source, const CompileOptions *options) 
 
   if (wait_result == WAIT_OBJECT_0) {
     process_finished = TRUE;
+
+    // 終了コード記録
+    DWORD exit_code = 0;
+
+    if (!GetExitCodeProcess(process_info.hProcess, &exit_code)) {
+      result.status = COMPILE_INTERNAL_ERROR;
+      goto cleanup;
+    }
+
+    result.exit_code = exit_code;
+    result.has_exit_code = 1;
   } else if (wait_result == WAIT_TIMEOUT) {
     result.status = COMPILE_TIMEOUT;
     goto cleanup;
