@@ -21,7 +21,9 @@
 #include <synchapi.h>
 #include <wchar.h>
 #include <winbase.h>
+#include <winerror.h>
 #include <winnt.h>
+#include <winsvc.h>
 
 // 補助関数：一時ファイル作成
 static int ensure_app_temp_dir(const wchar_t *path) {
@@ -278,6 +280,9 @@ CompileResult compile_source(const char *source, const CompileOptions *options) 
     return result;
   }
 
+  // プロセスの終了識別
+  BOOL process_finished = FALSE;
+
   // プロセス作成
   BOOL created = CreateProcessW(compiler_path, command_line, NULL, NULL, FALSE, CREATE_SUSPENDED,
                                 NULL, work_dir, &startup_info, &process_info);
@@ -294,6 +299,27 @@ CompileResult compile_source(const char *source, const CompileOptions *options) 
     result.status = COMPILE_LAUNCH_ERROR;
     goto cleanup;
   }
+
+  // Clang実行開始
+  DWORD previous_count = ResumeThread(process_info.hThread);
+
+  if (previous_count == (DWORD)-1) {
+    goto cleanup;
+  }
+
+  // 終了待機時間
+  DWORD wait_result = WaitForSingleObject(process_info.hProcess, 10000);
+
+  if (wait_result == WAIT_OBJECT_0) {
+    process_finished = TRUE;
+  } else if (wait_result == WAIT_TIMEOUT) {
+    result.status = COMPILE_TIMEOUT;
+    goto cleanup;
+  } else {
+    goto cleanup;
+  }
+
+  goto cleanup;
 
   // ハンドルを閉じる
   goto cleanup;
