@@ -9,6 +9,7 @@
 
 #include <Windows.h>
 #include <corecrt_search.h>
+#include <fileapi.h>
 #include <handleapi.h>
 #include <jobapi2.h>
 #include <minwindef.h>
@@ -323,6 +324,17 @@ CompileResult compile_source(const char *source, const CompileOptions *options) 
 
     result.exit_code = exit_code;
     result.has_exit_code = 1;
+
+    // 実行ファイルの実在を確認
+    if (exit_code == 0) {
+      DWORD attributes = GetFileAttributesW(output_path);
+
+      // 存在しない・ディレクトリの場合
+      if (attributes == INVALID_FILE_ATTRIBUTES || (attributes & FILE_ATTRIBUTE_DIRECTORY)) {
+        result.status = COMPILE_INTERNAL_ERROR;
+        goto cleanup;
+      }
+    }
   } else if (wait_result == WAIT_TIMEOUT) {
     result.status = COMPILE_TIMEOUT;
     goto cleanup;
