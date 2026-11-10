@@ -81,23 +81,34 @@ function Invoke-ProjectToolSetup {
             }
             $curl = Get-Command curl.exe -ErrorAction SilentlyContinue
             if ($curl) {
-                $curlArgs = @('--disable','--fail','--location','--proto','=https','--proto-redir','=https','--silent','--show-error','--retry','5','--retry-all-errors','--retry-delay','2','--connect-timeout','30')
-                if ($hadPartial) { $curlArgs += @('--continue-at','-') }
-                $curlArgs += @('--output',$partial,'--write-out',"HTTP %{http_code} bytes=%{size_download}",$uri.AbsoluteUri)
-                $previousErrorAction = $ErrorActionPreference
-                $ErrorActionPreference = 'Continue'
-                try { $downloadOutput = & $curl.Source @curlArgs 2>&1; $downloadCode = $LASTEXITCODE }
-                finally { $ErrorActionPreference = $previousErrorAction }
-                foreach ($line in $downloadOutput) { Write-ToolLog ([string]$line) }
-                if ($downloadCode -ne 0 -and $hadPartial) {
-                    Write-ToolLog "Resuming the partial $Name download failed (exit $downloadCode); retrying once from the beginning." 'WARN'
-                    Remove-Item -LiteralPath $partial -Force -ErrorAction SilentlyContinue
-                    $curlArgs = @('--disable','--fail','--location','--proto','=https','--proto-redir','=https','--silent','--show-error','--retry','5','--retry-all-errors','--retry-delay','2','--connect-timeout','30','--output',$partial,'--write-out',"HTTP %{http_code} bytes=%{size_download}",$uri.AbsoluteUri)
+                $maxDownloadAttempts = 3
+                $retryDelaySeconds = 5
+                $downloadCode = -1
+                for ($downloadAttempt = 1; $downloadAttempt -le $maxDownloadAttempts; $downloadAttempt++) {
+                    $hadPartial = Test-Path -LiteralPath $partial
+                    $curlArgs = @('--disable','--fail','--location','--proto','=https','--proto-redir','=https','--silent','--show-error','--retry','5','--retry-all-errors','--retry-delay','2','--connect-timeout','30')
+                    if ($hadPartial) { $curlArgs += @('--continue-at','-') }
+                    $curlArgs += @('--output',$partial,'--write-out',"HTTP %{http_code} bytes=%{size_download}",$uri.AbsoluteUri)
                     $previousErrorAction = $ErrorActionPreference
                     $ErrorActionPreference = 'Continue'
                     try { $downloadOutput = & $curl.Source @curlArgs 2>&1; $downloadCode = $LASTEXITCODE }
                     finally { $ErrorActionPreference = $previousErrorAction }
                     foreach ($line in $downloadOutput) { Write-ToolLog ([string]$line) }
+                    if ($downloadCode -ne 0 -and $hadPartial) {
+                        Write-ToolLog "Resuming the partial $Name download failed (exit $downloadCode); retrying once from the beginning." 'WARN'
+                        Remove-Item -LiteralPath $partial -Force -ErrorAction SilentlyContinue
+                        $curlArgs = @('--disable','--fail','--location','--proto','=https','--proto-redir','=https','--silent','--show-error','--retry','5','--retry-all-errors','--retry-delay','2','--connect-timeout','30','--output',$partial,'--write-out',"HTTP %{http_code} bytes=%{size_download}",$uri.AbsoluteUri)
+                        $previousErrorAction = $ErrorActionPreference
+                        $ErrorActionPreference = 'Continue'
+                        try { $downloadOutput = & $curl.Source @curlArgs 2>&1; $downloadCode = $LASTEXITCODE }
+                        finally { $ErrorActionPreference = $previousErrorAction }
+                        foreach ($line in $downloadOutput) { Write-ToolLog ([string]$line) }
+                    }
+                    if ($downloadCode -eq 0) { break }
+                    if ($downloadAttempt -lt $maxDownloadAttempts) {
+                        Write-ToolLog "Download attempt $downloadAttempt for '$Name' failed with curl exit code $downloadCode; retrying after $retryDelaySeconds seconds." 'WARN'
+                        Start-Sleep -Seconds $retryDelaySeconds
+                    }
                 }
                 if ($downloadCode -ne 0) { throw "Download for '$Name' failed with curl exit code $downloadCode." }
             } else {
