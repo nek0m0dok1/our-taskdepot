@@ -5,19 +5,18 @@
 
 #pragma comment(lib, "Comdlg32.lib")
 
-#define ID_CODE         101
-#define ID_RESULT       102                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-#define ID_RUN          103
-#define ID_FILE         104
-#define ID_SAVE         105
-#define ID_GIT          106
-#define ID_THEME        107
-#define ID_COPY_RESULT  108
+#define ID_CODE 101
+#define ID_RESULT 102
+#define ID_RUN 103
+#define ID_FILE 104
+#define ID_SAVE 105
+#define ID_GIT 106
+#define ID_THEME 107
+#define ID_COPY_RESULT 108
 
 HWND hCode;
 HWND hResult;
 HFONT hFont;
-
 
 // �t�H���g�ݒ�
 void SetControlFont(HWND hwnd)
@@ -26,10 +25,8 @@ void SetControlFont(HWND hwnd)
         hwnd,
         WM_SETFONT,
         (WPARAM)hFont,
-        TRUE
-    );
+        TRUE);
 }
-
 
 // �t�@�C�����J��
 void OpenCodeFile(HWND hwnd)
@@ -65,8 +62,7 @@ void OpenCodeFile(HWND hwnd)
         NULL,
         OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL,
-        NULL
-    );
+        NULL);
 
     if (hFile == INVALID_HANDLE_VALUE)
     {
@@ -74,8 +70,7 @@ void OpenCodeFile(HWND hwnd)
             hwnd,
             L"�t�@�C�����J���܂���ł����B",
             L"�G���[",
-            MB_OK | MB_ICONERROR
-        );
+            MB_OK | MB_ICONERROR);
 
         return;
     }
@@ -92,15 +87,13 @@ void OpenCodeFile(HWND hwnd)
             hwnd,
             L"�t�@�C���T�C�Y���傫�����܂��B",
             L"�G���[",
-            MB_OK | MB_ICONERROR
-        );
+            MB_OK | MB_ICONERROR);
 
         return;
     }
 
     std::vector<char> buffer(
-        static_cast<size_t>(fileSize.QuadPart)
-    );
+        static_cast<size_t>(fileSize.QuadPart));
 
     DWORD bytesRead = 0;
 
@@ -113,8 +106,7 @@ void OpenCodeFile(HWND hwnd)
             buffer.data(),
             static_cast<DWORD>(buffer.size()),
             &bytesRead,
-            NULL
-        );
+            NULL);
     }
 
     CloseHandle(hFile);
@@ -125,8 +117,7 @@ void OpenCodeFile(HWND hwnd)
             hwnd,
             L"�t�@�C���̓ǂݍ��݂Ɏ��s���܂����B",
             L"�G���[",
-            MB_OK | MB_ICONERROR
-        );
+            MB_OK | MB_ICONERROR);
 
         return;
     }
@@ -151,8 +142,7 @@ void OpenCodeFile(HWND hwnd)
             buffer.data(),
             (int)buffer.size(),
             NULL,
-            0
-        );
+            0);
 
         UINT codePage = CP_UTF8;
 
@@ -166,8 +156,7 @@ void OpenCodeFile(HWND hwnd)
                 buffer.data(),
                 (int)buffer.size(),
                 NULL,
-                0
-            );
+                0);
         }
 
         if (size > 0)
@@ -180,14 +169,12 @@ void OpenCodeFile(HWND hwnd)
                 buffer.data(),
                 (int)buffer.size(),
                 code.data(),
-                size
-            );
+                size);
         }
     }
 
     SetWindowTextW(hCode, code.c_str());
 }
-
 
 // ���ʂ��R�s�[����
 void CopyResult(HWND hwnd)
@@ -200,8 +187,7 @@ void CopyResult(HWND hwnd)
             hwnd,
             L"�R�s�[���錋�ʂ�����܂���B",
             L"���m�点",
-            MB_OK | MB_ICONINFORMATION
-        );
+            MB_OK | MB_ICONINFORMATION);
 
         return;
     }
@@ -211,8 +197,7 @@ void CopyResult(HWND hwnd)
     GetWindowTextW(
         hResult,
         result.data(),
-        length + 1
-    );
+        length + 1);
 
     result.resize(length);
 
@@ -222,8 +207,7 @@ void CopyResult(HWND hwnd)
             hwnd,
             L"�N���b�v�{�[�h���J���܂���ł����B",
             L"�G���[",
-            MB_OK | MB_ICONERROR
-        );
+            MB_OK | MB_ICONERROR);
 
         return;
     }
@@ -235,8 +219,7 @@ void CopyResult(HWND hwnd)
 
     HGLOBAL hMemory = GlobalAlloc(
         GMEM_MOVEABLE,
-        bytes
-    );
+        bytes);
 
     if (!hMemory)
     {
@@ -246,14 +229,13 @@ void CopyResult(HWND hwnd)
             hwnd,
             L"�������̊m�ۂɎ��s���܂����B",
             L"�G���[",
-            MB_OK | MB_ICONERROR
-        );
+            MB_OK | MB_ICONERROR);
 
         return;
     }
 
-    wchar_t* destination =
-        (wchar_t*)GlobalLock(hMemory);
+    wchar_t *destination =
+        (wchar_t *)GlobalLock(hMemory);
 
     if (!destination)
     {
@@ -266,8 +248,7 @@ void CopyResult(HWND hwnd)
     memcpy(
         destination,
         result.c_str(),
-        bytes
-    );
+        bytes);
 
     GlobalUnlock(hMemory);
 
@@ -280,8 +261,7 @@ void CopyResult(HWND hwnd)
             hwnd,
             L"�R�s�[�Ɏ��s���܂����B",
             L"�G���[",
-            MB_OK | MB_ICONERROR
-        );
+            MB_OK | MB_ICONERROR);
 
         return;
     }
@@ -292,18 +272,15 @@ void CopyResult(HWND hwnd)
         hwnd,
         L"���ʂ��R�s�[���܂����B",
         L"����",
-        MB_OK | MB_ICONINFORMATION
-    );
+        MB_OK | MB_ICONINFORMATION);
 }
-
 
 // �E�B���h�E�̏���
 LRESULT CALLBACK WindowProc(
     HWND hwnd,
     UINT message,
     WPARAM wParam,
-    LPARAM lParam
-)
+    LPARAM lParam)
 {
     switch (message)
     {
@@ -319,8 +296,7 @@ LRESULT CALLBACK WindowProc(
             CLIP_DEFAULT_PRECIS,
             CLEARTYPE_QUALITY,
             DEFAULT_PITCH | FF_DONTCARE,
-            L"Yu Gothic UI"
-        );
+            L"Yu Gothic UI");
 
         // �\�[�X�R�[�h���̓��x��
         HWND hCodeLabel = CreateWindowW(
@@ -331,8 +307,7 @@ LRESULT CALLBACK WindowProc(
             hwnd,
             NULL,
             NULL,
-            NULL
-        );
+            NULL);
 
         // ���s���ʁE�G���[���x��
         HWND hResultLabel = CreateWindowW(
@@ -343,8 +318,7 @@ LRESULT CALLBACK WindowProc(
             hwnd,
             NULL,
             NULL,
-            NULL
-        );
+            NULL);
 
         // �\�[�X�R�[�h���͗�
         hCode = CreateWindowExW(
@@ -352,17 +326,16 @@ LRESULT CALLBACK WindowProc(
             L"EDIT",
             L"",
             WS_CHILD | WS_VISIBLE |
-            WS_VSCROLL | WS_HSCROLL |
-            ES_MULTILINE |
-            ES_AUTOVSCROLL |
-            ES_AUTOHSCROLL |
-            ES_WANTRETURN,
+                WS_VSCROLL | WS_HSCROLL |
+                ES_MULTILINE |
+                ES_AUTOVSCROLL |
+                ES_AUTOHSCROLL |
+                ES_WANTRETURN,
             20, 105, 480, 400,
             hwnd,
             (HMENU)ID_CODE,
             NULL,
-            NULL
-        );
+            NULL);
 
         // ���s���ʁE�G���[�\����
         hResult = CreateWindowExW(
@@ -370,17 +343,16 @@ LRESULT CALLBACK WindowProc(
             L"EDIT",
             L"",
             WS_CHILD | WS_VISIBLE |
-            WS_VSCROLL | WS_HSCROLL |
-            ES_MULTILINE |
-            ES_AUTOVSCROLL |
-            ES_AUTOHSCROLL |
-            ES_READONLY,
+                WS_VSCROLL | WS_HSCROLL |
+                ES_MULTILINE |
+                ES_AUTOVSCROLL |
+                ES_AUTOHSCROLL |
+                ES_READONLY,
             530, 105, 530, 400,
             hwnd,
             (HMENU)ID_RESULT,
             NULL,
-            NULL
-        );
+            NULL);
 
         // �t�@�C�����J��
         HWND hFileButton = CreateWindowW(
@@ -391,8 +363,7 @@ LRESULT CALLBACK WindowProc(
             hwnd,
             (HMENU)ID_FILE,
             NULL,
-            NULL
-        );
+            NULL);
 
         // �e�[�}�ύX
         HWND hThemeButton = CreateWindowW(
@@ -403,8 +374,7 @@ LRESULT CALLBACK WindowProc(
             hwnd,
             (HMENU)ID_THEME,
             NULL,
-            NULL
-        );
+            NULL);
 
         // ���ʂ��R�s�[
         HWND hCopyButton = CreateWindowW(
@@ -415,8 +385,7 @@ LRESULT CALLBACK WindowProc(
             hwnd,
             (HMENU)ID_COPY_RESULT,
             NULL,
-            NULL
-        );
+            NULL);
 
         // ���s
         HWND hRunButton = CreateWindowW(
@@ -427,8 +396,7 @@ LRESULT CALLBACK WindowProc(
             hwnd,
             (HMENU)ID_RUN,
             NULL,
-            NULL
-        );
+            NULL);
 
         // �ۑ�
         HWND hSaveButton = CreateWindowW(
@@ -439,8 +407,7 @@ LRESULT CALLBACK WindowProc(
             hwnd,
             (HMENU)ID_SAVE,
             NULL,
-            NULL
-        );
+            NULL);
 
         // Git���|�W�g��
         HWND hGitButton = CreateWindowW(
@@ -451,8 +418,7 @@ LRESULT CALLBACK WindowProc(
             hwnd,
             (HMENU)ID_GIT,
             NULL,
-            NULL
-        );
+            NULL);
 
         // �t�H���g��ݒ�
         SetControlFont(hCodeLabel);
@@ -488,8 +454,7 @@ LRESULT CALLBACK WindowProc(
                 hwnd,
                 L"���s�@�\�͂܂���������Ă��܂���B",
                 L"���m�点",
-                MB_OK | MB_ICONINFORMATION
-            );
+                MB_OK | MB_ICONINFORMATION);
             return 0;
 
         case ID_SAVE:
@@ -497,8 +462,7 @@ LRESULT CALLBACK WindowProc(
                 hwnd,
                 L"�ۑ��@�\�͂܂���������Ă��܂���B",
                 L"���m�点",
-                MB_OK | MB_ICONINFORMATION
-            );
+                MB_OK | MB_ICONINFORMATION);
             return 0;
 
         case ID_GIT:
@@ -506,8 +470,7 @@ LRESULT CALLBACK WindowProc(
                 hwnd,
                 L"Git���|�W�g���@�\�͂܂���������Ă��܂���B",
                 L"���m�点",
-                MB_OK | MB_ICONINFORMATION
-            );
+                MB_OK | MB_ICONINFORMATION);
             return 0;
 
         case ID_THEME:
@@ -515,8 +478,7 @@ LRESULT CALLBACK WindowProc(
                 hwnd,
                 L"�e�[�}�ύX�@�\�͂܂���������Ă��܂���B",
                 L"���m�点",
-                MB_OK | MB_ICONINFORMATION
-            );
+                MB_OK | MB_ICONINFORMATION);
             return 0;
         }
 
@@ -539,18 +501,15 @@ LRESULT CALLBACK WindowProc(
         hwnd,
         message,
         wParam,
-        lParam
-    );
+        lParam);
 }
-
 
 // �A�v���P�[�V�����̊J�n
 int WINAPI wWinMain(
     HINSTANCE hInstance,
     HINSTANCE hPrevInstance,
     PWSTR pCmdLine,
-    int nCmdShow
-)
+    int nCmdShow)
 {
     const wchar_t CLASS_NAME[] =
         L"CErrorExplanationTool";
@@ -579,8 +538,7 @@ int WINAPI wWinMain(
         NULL,
         NULL,
         hInstance,
-        NULL
-    );
+        NULL);
 
     if (!hwnd)
         return 0;
