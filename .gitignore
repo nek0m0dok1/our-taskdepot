@@ -7,10 +7,11 @@
 dev-prepare.md
 .agents/
 
-# CMake/Ninja build output
+# build output
 /build/
 /out/
 CMakeUserPresets.json
+build-vs2026/
 
 # Editor and operating system state
 .vs/
