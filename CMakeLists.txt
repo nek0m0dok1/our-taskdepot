@@ -20,3 +20,6 @@ src/mock_compile.c
 )
 
 target_link_libraries(taskdepot_gui PRIVATE user32)
+if(MSVC)
+add_compile_options(/utf-8)
+endif()
