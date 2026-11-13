@@ -14,3 +14,13 @@ include(cmake/Dependencies.cmake)
 if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
+
+# Compilerモジュール
+add_library(compiler STATIC
+  src/compiler/compiler.c
+)
+
+# compiler.h の検索場所
+target_include_directories(compiler PUBLIC
+  "${PROJECT_SOURCE_DIR}/include"
+)
