@@ -81,9 +81,9 @@
     },
     "scintilla": {
       "version": "5.6.7",
-      "url": "https://www.scintilla.org/wscite567.zip",
+      "url": "https://downloads.sourceforge.net/project/scintilla/SciTE/5.6.7/wscite567.zip",
       "sha256": "24b6c63fc61d8fb57b782bac6149352dde262212a9588367bde4b2def599f353",
-      "provenance": "https://raw.githubusercontent.com/ScoopInstaller/Extras/master/bucket/scite.json",
+      "provenance": "https://sourceforge.net/projects/scintilla/files/SciTE/5.6.7/",
       "archiveType": "zip",
       "installPath": "scintilla",
       "stripTopLevel": false,
