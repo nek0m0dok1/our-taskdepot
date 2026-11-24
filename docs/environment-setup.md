@@ -5,7 +5,7 @@ discription: 既存の開発基盤を尊重した構築と検証の範囲を記�
 
 # Windows開発環境の再確認
 
-状態: 構築とローカル検証完了（学校PCは未確認）
+状態: 旧構成の構築とローカル検証履歴あり。現在のVS2026 generator限定変更は未検証箇所あり（学校PCは未確認）
 
 更新日: 2026年10月29日
 
@@ -20,7 +20,7 @@ discription: 既存の開発基盤を尊重した構築と検証の範囲を記�
 ## 構成
 
 - 入口は`setup.cmd`。Windows PowerShell 5.1でツール導入、検証、フック登録、ビルド、テストを実行する。
-- 本体はC言語・MSVC x64・CMake・Ninja。利用者コード用のLLVM-MinGW UCRTとは分離する。
+- 本体はC言語・Visual Studio 2026 MSVC x64・同梱CMakeを使用する。利用者コード用のLLVM-MinGW UCRTとは分離する。
 - 開発補助にclang-format、clang-tidy、Python、pre-commitを使用する。
 - 固定バージョン・公式URL・期待SHA-256・出典は`tools/versions.json`で管理する。
 - 自分でダウンロードしたファイルのハッシュ計算だけを期待値の根拠にしない。
@@ -30,11 +30,11 @@ discription: 既存の開発基盤を尊重した構築と検証の範囲を記�
 
 ## 検証の扱い
 
-以前の実行結果は[開発基盤の検証記録](development-validation.md)と[ツール検証記録](tooling-validation.md)に残す。2026年10月29日の再確認結果は以下に区別して記載する。
+以前の実行結果は[開発基盤の検証記録](development-validation.md)と[ツール検証記録](tooling-validation.md)に残す。以下の2026年10月29日の結果は当時の構成に対する履歴であり、現在のVisual Studio 18 generator限定・厳格なVS instance選定を検証していない。現変更の結果は[VS2026 foundation verification record](vs2026-foundation-verification.md)に記載する。
 
 6人の学校PC、Visual Studio未導入PC、GitHub Actions上の実行、ブランチ保護の有効化は、こちらで実施していない限り確認済みとしない。
 
-### 2026年10月29日の実行結果
+### 2026年10月29日の旧構成の実行結果（履歴）
 
 現在の`setup` workspaceで、既存の固定版ツールと取得済みキャッシュをコピーして再検証した。古いビルドディレクトリやPython仮想環境はコピーせず、このworkspaceで構成・作成した。
 

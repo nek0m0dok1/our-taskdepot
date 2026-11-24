@@ -9,9 +9,10 @@ dev-prepare.md
 
 # build output
 /build/
+/build-old-*/
+/build-vs2026/
 /out/
 CMakeUserPresets.json
-build-vs2026/
 
 # Editor and operating system state
 .vs/

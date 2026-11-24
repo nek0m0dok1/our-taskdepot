@@ -23,28 +23,6 @@
       "executables": { "python": "python.exe" },
       "versionArguments": { "python": ["-c", "import sys; print('.'.join(map(str, sys.version_info[:3])))"] }
     },
-    "cmake": {
-      "version": "3.31.8",
-      "url": "https://github.com/Kitware/CMake/releases/download/v3.31.8/cmake-3.31.8-windows-x86_64.zip",
-      "sha256": "81aa9964dbabd71fe02e7ec50472fd3ad56138c49944515ece9001efbff8d719",
-      "provenance": "https://github.com/Kitware/CMake/releases/expanded_assets/v3.31.8",
-      "archiveType": "zip",
-      "installPath": "cmake",
-      "stripTopLevel": true,
-      "executables": { "cmake": "bin/cmake.exe", "ctest": "bin/ctest.exe" },
-      "versionArguments": { "cmake": ["--version"], "ctest": ["--version"] }
-    },
-    "ninja": {
-      "version": "1.13.1",
-      "url": "https://github.com/ninja-build/ninja/releases/download/v1.13.1/ninja-win.zip",
-      "sha256": "26a40fa8595694dec2fad4911e62d29e10525d2133c9a4230b66397774ae25bf",
-      "provenance": "https://github.com/ninja-build/ninja/releases/expanded_assets/v1.13.1",
-      "archiveType": "zip",
-      "installPath": "ninja",
-      "stripTopLevel": false,
-      "executables": { "ninja": "ninja.exe" },
-      "versionArguments": { "ninja": ["--version"] }
-    },
     "clangFormat": {
       "version": "20.1.8",
       "url": "https://files.pythonhosted.org/packages/bd/ee/656287efdf58dccc7a7299fab547fe1313b49ca1ea1607ea475b262d640f/clang_format-20.1.8-py2.py3-none-win_amd64.whl",
