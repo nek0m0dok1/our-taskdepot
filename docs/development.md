@@ -4,7 +4,7 @@
 
 - 利用者向けの対応環境は Windows 11 x64 です。
 - アプリ本体は MSVC x64、利用者が入力する C コードは LLVM-MinGW UCRT でコンパイルします。
-- 開発用の Visual Studio は Visual Studio 2022 17.8 以降、または Visual Studio 2026 を想定します。「C++ によるデスクトップ開発」、MSVC 19.38 以降の x64/x86 build tools と Windows 11 SDK 10.0.22000.0 以降が必要です。
+- 開発用IDEは Visual Studio 2026 のみをサポートします。「C++ によるデスクトップ開発」と同ワークロードのCMakeツール、MSVC 19.50 以降のx64/x86 build tools、Windows 11 SDK 10.0.22000.0 以降が必要です。VS2022やその他のMSVCはsetupで明示的に拒否します。
 - MSVC と Windows SDK は Visual Studio Installer が管理するため、`tools/versions.json` では配布・更新しません。セットアップは `vswhere` で既存の Visual Studio を検出し、その `VsDevCmd.bat` を現在の PowerShell プロセスに適用します。見つからない場合は理由と Installer で必要なコンポーネントを表示して停止します。自動インストール・修復・更新は行いません。
 
 ## 初回セットアップ
@@ -14,7 +14,7 @@
 3. エクスプローラーから `setup.cmd` を実行します。
 4. すべての工程が成功したら VS Code でリポジトリを開き、作業ブランチを作成します。
 
-`setup.cmd` は Windows PowerShell 5.1 を起動し、Windows 11 x64、MSVC x64、ツール、pre-commit、CMake configure/build、CTest、コード形式と clang-tidy の実行を確認します。完了メッセージが出るまで VS Code を開く必要はありません。
+`setup.cmd` は Windows PowerShell 5.1 を起動し、Windows 11 x64、Visual Studio 2026と同梱CMake、MSVC x64、プロジェクト管理ツール、pre-commit、CMake configure/build、CTest、コード形式と clang-tidy の実行を確認します。完了メッセージが出るまで VS Code を開く必要はありません。
 
 ツールは `.tools/`、Python と pre-commit の仮想環境は `.setup/venv/`、取得したアーカイブは `.setup/downloads/`、ログは `.setup/logs/` に保存します。`.setup/` と `.tools/` は Git に登録されません。インストール済みファイルと再利用するキャッシュは実行ごとにハッシュ・バージョンを検証します。失敗したダウンロードや不完全な展開は成功扱いせず、次の実行で再取得・再展開します。
 
@@ -24,13 +24,12 @@
 
 セットアップで Git の pre-commit hook を登録します。コミット前に以下を確認します。
 
-- clang-format による C/C++ の整形
 - 行末の空白と最終改行
 - JSON 構文
 - マージ競合マーカー
 - 追加するファイルのサイズ上限
 
-自動整形で差分が変わった場合、hook はコミットを止めます。差分を確認してから、必要に応じてもう一度コミットしてください。フックを手動で実行する場合は次のとおりです。
+フックを手動で実行する場合は次のとおりです。
 
 ```powershell
 .setup/venv/Scripts/python.exe -m pre_commit run --all-files
@@ -40,17 +39,17 @@ Git worktree は通常 `.git/hooks` を共有します。`setup.cmd` の標準 `
 
 `.vscode/settings.json` と `.vscode/extensions.json` は任意の VS Code 設定です。VS Code を使わない場合も同じ `setup.cmd` と CI を利用できます。
 
-VS Code で C/C++ ファイルを保存すると、推奨拡張の Clang-Format が `.tools/clang-format/clang_format/data/bin/clang-format.exe` を実行します。この実行ファイルは `tools/versions.json` で固定した clang-format 20.1.8 です。clangd 拡張は補完・診断などの言語機能用であり、保存時の整形には使いません。
+VS Code で C/C++ ファイルを保存すると、C/C++ 拡張機能が `.tools/clang-format/clang_format/data/bin/clang-format.exe` を実行します。この実行ファイルは `tools/versions.json` で固定した clang-format 20.1.8 です。C/C++ 拡張機能は、ファイルを開いたときと保存したときに固定版の clang-tidy も実行します。診断は「問題」パネルに表示され、検査項目は .clang-tidy で管理します。CMake Tools がビルド設定を C/C++ 拡張機能に渡します。設定が取得できない場合は VS Code で「CMake: Configure」を実行してください。
 
 ## ビルドとテスト
 
-セットアップは既定の `default` CMake preset を使います。手動で再実行する場合は、Visual Studio Developer PowerShell で次を実行します。
+セットアップと `scripts/check.ps1` は既定の `default` CMake preset と同じく選定したVisual Studio 2026インスタンスの絶対パスを使い、generator instanceを明示します。ビルドキャッシュのgeneratorまたはVS instanceが異なる場合、既存ディレクトリを変更せず停止します。内容を確認してから `tools/clean-build.ps1` で `build-old-<timestamp>` に退避するか、手動で別の場所へ移して再実行してください。古い`.tools/`インストールの任意の確認・隔離は[旧ツールの整理手順](cleanup-legacy-build.md)に従ってください。CMake build cacheは同手順の対象外です。
 
 ```powershell
-& .tools/cmake/bin/cmake.exe --preset default
-& .tools/cmake/bin/cmake.exe --build build --config Debug --parallel
-& .tools/cmake/bin/ctest.exe --test-dir build -C Debug --output-on-failure --no-tests=error
+.\scripts\setup.ps1
 ```
+
+このセットアップは pinned project tools と pre-commit も検証します。構成・ビルド・CTestだけを直接再確認する場合は、VS2026環境を選択して同じ絶対パスを使う `scripts/check.ps1` を実行してください。
 
 CTest が 0 件の場合も失敗です。構成、ビルド、テストのどれかが失敗したときは setup 全体が失敗します。`.setup/logs/` の該当ログにはコマンド、外部ツールの出力、失敗の詳細が残ります。ログを共有する前に、個人情報が含まれていないか確認してください。
 
@@ -68,6 +67,8 @@ Python は Astral の `python-build-standalone` 専用展開物を `.tools/pytho
 
 ## セットアップ検証記録
 
-現在の検証基準は `aaed34d7800175e826ddb1a240ecae75712cba37` です。Windows 11 x64、既存 Visual Studio Community 2026 / MSVC 19.51.36260 / SDK 10.0.26100 のコーディネーターの独立 clone で、修正後の `setup.cmd` 2 回がともに exit 0、setup 内で CMake configure/build 成功、CTest 1/1、clang-tidy 完了を確認しました。Windows SDK の解析警告は advisory です。`pre-commit run --all-files` も exit 0 でしたが、その実行の clang-format hook は対象ファイルなしで skip でした。setup 自体の format check は実行済みです。
+以下は基準 `aaed34d7800175e826ddb1a240ecae75712cba37` の旧構成に対する履歴記録です。VS2026専用のVisual Studio 18 generatorと厳格なインスタンス選定を加えた現在の変更を検証した結果ではありません。現変更の結果は[VS2026 foundation verification record](vs2026-foundation-verification.md)を参照してください。
+
+Windows 11 x64、既存 Visual Studio Community 2026 / MSVC 19.51.36260 / SDK 10.0.26100 のコーディネーターの独立 clone で、当時の `setup.cmd` 2 回がともに exit 0、setup 内で CMake configure/build 成功、CTest 1/1、clang-tidy 完了を確認しました。Windows SDK の解析警告は advisory です。`pre-commit run --all-files` も exit 0 でしたが、その実行の clang-format hook は対象ファイルなしで skip でした。setup 自体の format check は実行済みです。
 
 実装ワーカーの確認、独立 Sol レビュー、コーディネーターの独立 clone の結果、実装ワーカーの専用 retry fixture は [tooling-validation.md](tooling-validation.md)、全体の基準と履歴は [development-validation.md](development-validation.md) に区別して記録しています。既存 Visual Studio、グローバル PATH、永続的な環境設定は変更していません。GitHub Actions、新しいクリーンな Windows PC、Visual Studio 不在のケース、別の VS/SDK 構成は未検証です。アプリのライセンスと第三者コンポーネントの再配布判断も未解決であり、今回の対象は開発基盤のみです。

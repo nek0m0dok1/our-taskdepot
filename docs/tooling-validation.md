@@ -3,6 +3,8 @@ name: tooling validation
 discription: Results, conditions, and outstanding checks for project-local Windows developer tools.
 ---
 
+> This is a historical record for the previous toolchain. For current requirements and results, see [VS2026 foundation verification](vs2026-foundation-verification.md).
+
 # 開発ツールの検証記録
 
 ## 実行条件
@@ -70,7 +72,6 @@ Visual Studio は既存インストールを `vswhere` で検出し、`VsDevCmd.
 
 - GitHub Actions 上の CI 実行。workflow の存在やローカル成功は Actions の成功を意味しません。
 - 新しいクリーンな Windows PC と Visual Studio 不在のケース。
-- Visual Studio 2022 17.8 以降と Windows SDK 10.0.22000.0 以降を使った別環境での確認。
 - アプリのライセンス選定と第三者コンポーネントの再配布判断。開発基盤の検証完了によって確定したものではありません。
 
 実装ワーカーの作業開始時に指定された ADR-0010 は `docs/adr/` と `docs/` のどちらにも存在しませんでした。当時利用できた設計資料と要件は README、[development.md](development.md)、`docs/adr/0002-build-system.md`、`0003-compiler-integration-policy.md`、`0009-github-workflow.md` で確認しました。今回の文書更新では、Git 管理外の元要件書 `C:/Users/MimiC/our-taskdepot/docs/dev-prepare.md` も読み、検証条件と未完了事項を明示する方針を確認しました。

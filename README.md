@@ -4,17 +4,17 @@ Windows 11 x64 向けの C 言語学習支援アプリです。アプリ本体�
 
 ## 開発環境の準備
 
-1. Visual Studio Installer で Visual Studio 2022 17.8 以降、または Visual Studio 2026 に「C++ によるデスクトップ開発」、MSVC 19.38 以降の x64/x86 build tools、Windows 11 SDK 10.0.22000.0 以降を追加してください。
+1. Visual Studio Installer で Visual Studio 2026 18.x に「C++ によるデスクトップ開発」とそのCMakeツール、MSVC 19.50以降のx64/x86 build tools、Windows 11 SDK 10.0.22000.0 以降を追加してください。VS2022などの別MSVC環境はサポートしません。
 2. リポジトリ直下の `setup.cmd` を実行してください。ツールのダウンロードと SHA-256 検証、pre-commit の設定、MSVC による構成・ビルド、CTest まで行います。
-3. 完了後に VS Code でこのフォルダーを開き、Issue ごとのブランチで作業します。
+3. 完了後に VS Code でこのフォルダーを開き、推奨拡張機能をインストールしてください。C/C++ ファイルの保存時に clang-format が整形し、clang-tidy が問題を報告します。
 
-セットアップはツールをこのチェックアウトの `.tools/`、Python 仮想環境・ダウンロードキャッシュ・実行ログを `.setup/` に置きます。Visual Studio のインストールや既存 Python の登録、ユーザー・システム PATH は変更しません。繰り返し実行できます。詳しくは [docs/development.md](docs/development.md) を参照してください。
+初回のセットアップでは、固定バージョンのツールとライブラリを取得するため、インターネット接続が必要です。セットアップはツールをこのチェックアウトの `.tools/`、Python 仮想環境・ダウンロードキャッシュ・実行ログを `.setup/` に置きます。Visual Studio のインストールや既存 Python の登録、ユーザー・システム PATH は変更しません。繰り返し実行できます。詳しくは [docs/development.md](docs/development.md) を参照してください。
 
-ツールの固定バージョン、公式ダウンロード先、確認元、SHA-256 は [tools/versions.json](tools/versions.json) にあります。ライブラリのダウンロードとハッシュ検証は CMake の FetchContent が行います。
+プロジェクト管理ツールの固定バージョン、公式ダウンロード先、確認元、SHA-256 は [tools/versions.json](tools/versions.json) にあります。CMakeはVisual Studio 2026同梱の4.2以降を使用し、Visual Studio 18 2026 generator、x64、v145を選びます。ライブラリのダウンロードとハッシュ検証はCMakeのFetchContentが行います。
 
 ## ローカル確認
 
-`setup.cmd` が configure、build、CTest、コード形式、clang-tidy を実行します。失敗時は `.setup/logs/` の最新ログを確認してください。品質確認とセットアップ検証の記録は [docs/tooling-validation.md](docs/tooling-validation.md) にあります。
+`setup.cmd` が configure、build、CTest、コード形式、clang-tidy を実行します。失敗時は `.setup/logs/` の最新ログを確認してください。現在の実行結果と未確認項目は [docs/vs2026-foundation-verification.md](docs/vs2026-foundation-verification.md) に、以前の基盤に関する検証履歴は [docs/tooling-validation.md](docs/tooling-validation.md) にあります。
 
 ## 導入するツールと必要な理由
 
@@ -26,9 +26,8 @@ MSVCとWindows SDKは、各PCのVisual Studio Installerで先に確認してく�
 | Windows SDK | Win32 APIのヘッダーとライブラリを提供し、Windows向けのコードをビルドするために必要です。 |
 | Git（MinGit） | ソースの変更履歴・ブランチ・共有を扱い、6人の共同開発とGitフックを動かすために必要です。 |
 | CMake／CTest | 共通設定からビルド手順を生成し、登録したテストを同じ手順で実行するために必要です。 |
-| Ninja | CMakeが生成した手順に従ってコンパイルとリンクを実行するために必要なツールです。 |
 | Python | コミット前チェックを管理するpre-commitを、プロジェクト専用の環境で実行するために必要です。 |
-| pre-commit | コミット前の整形・空白・JSONなどの軽量チェックを自動で実行するために必要です。 |
+| pre-commit | コミット前の空白・JSONなどの軽量チェックを自動で実行するために必要です。 |
 | clang-format | Cコードの書式を統一し、初心者同士のレビューで書式の差に時間を取られないようにするために必要です。 |
 | clang-tidy | Cコードを静的解析して不具合の候補を見つけ、レビューを補助するために必要です。 |
 | LLVM-MinGW UCRT | 利用者が入力するCコードをコンパイルするために必要な、本体開発用MSVCとは別のコンパイラです。 |
