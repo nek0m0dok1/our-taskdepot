@@ -1,10 +1,3 @@
-/*
- ファイル名: compiler.c
- 用途: 入力ソースコードのコンパイル処理に使用
- 内容: 型と関数の宣言
- */
-
-// ヘッダファイル
 #include "compiler/compiler.h"
 #include "workspace.h"
 
@@ -14,7 +7,6 @@
 #include <strsafe.h>
 #include <wchar.h>
 
-// 補助関数：Clang用JobObject作成
 static HANDLE create_compiler_job(void) {
   HANDLE job = CreateJobObjectW(NULL, NULL);
 
@@ -22,7 +14,7 @@ static HANDLE create_compiler_job(void) {
     return NULL;
   }
 
-  // 最後のハンドルを閉じたときに関連するプレセスを終了
+  // ハンドルを閉じると Clang とその子プロセスも止まるようにする。
   JOBOBJECT_EXTENDED_LIMIT_INFORMATION info = {0};
 
   info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
