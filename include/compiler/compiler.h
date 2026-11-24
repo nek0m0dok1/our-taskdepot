@@ -39,6 +39,10 @@ void compile_result_free(CompileResult *result);
 // 生成した一時実行ファイルを削除
 int compile_output_delete(const wchar_t *output_path);
 
+// 起動時に作業領域を確保し、管理下の未使用領域を最長3秒を目安に回収する。
+// 0: 成功、1: 一部の回収に失敗、-1: 作業領域を確保できない。
+int compile_recover_workspaces(void);
+
 // コンパイルの設定
 typedef struct {
   const wchar_t *compiler_path; // コンパイラのパス
@@ -47,5 +51,9 @@ typedef struct {
 
 // コンパイル結果を返す関数
 CompileResult compile_source(const char *source, const CompileOptions *options);
+
+// cancel_event は呼び出し完了まで有効な手動リセットイベントの HANDLE。NULL なら中断なし。
+CompileResult compile_source_with_cancel(const char *source, const CompileOptions *options,
+                                         void *cancel_event);
 
 #endif

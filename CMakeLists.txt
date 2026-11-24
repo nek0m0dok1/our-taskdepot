@@ -18,9 +18,12 @@ endif()
 # Compilerモジュール
 add_library(compiler STATIC
   src/compiler/compiler.c
+  src/compiler/workspace.c
 )
 
 # compiler.h の検索場所
 target_include_directories(compiler PUBLIC
   "${PROJECT_SOURCE_DIR}/include"
 )
+target_compile_options(compiler PRIVATE /utf-8)
+target_link_libraries(compiler PRIVATE ole32)
