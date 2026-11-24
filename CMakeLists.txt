@@ -34,6 +34,8 @@ endif()
 # Compilerモジュール
 add_library(compiler STATIC
   src/compiler/compiler.c
+  src/compiler/compiler_diagnostics.c
+  src/compiler/compiler_process.c
   src/compiler/compile_task.c
   src/compiler/workspace.c
 )
