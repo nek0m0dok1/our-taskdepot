@@ -16,7 +16,7 @@ concurrency:
 jobs:
   windows:
     name: Windows x64 tools, formatting, build, and tests
-    runs-on: windows-2025
+    runs-on: windows-2025-vs2026
     timeout-minutes: 60
     steps:
       - name: Check out source

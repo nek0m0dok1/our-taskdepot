@@ -3,6 +3,8 @@ name: development foundation validation
 discription: Records the final validation baseline, evidence owners, and remaining limits for the development foundation.
 ---
 
+> This is a historical record of the previous setup. For the VS2026-only implementation and current checks, see [VS2026 foundation verification](vs2026-foundation-verification.md).
+
 # 開発基盤の検証記録
 
 現在の検証基準コミット: `aaed34d7800175e826ddb1a240ecae75712cba37` (`foundation-resume-fixes`)。

@@ -61,50 +61,12 @@ function Assert-WindowsX64 {
     }
     Write-Log 'Windows x64 environment verified.' 'OK'
 }
-function Enter-MsvcEnvironment {
-    $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
-    if (-not (Test-Path -LiteralPath $vswhere -PathType Leaf)) { throw 'Visual Studio Installer vswhere.exe was not found. Install Visual Studio 2022/2026 Build Tools with the C++ x64/x86 tools and Windows 10/11 SDK, then rerun setup.cmd. The setup does not modify Visual Studio.' }
-    $matches = @(& $vswhere -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -latest -property installationPath 2>&1 | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) })
-    $vsCode = $LASTEXITCODE
-    if ($vsCode -ne 0 -or $matches.Count -eq 0) { throw 'No existing Visual Studio installation with Microsoft.VisualStudio.Component.VC.Tools.x86.x64 was found. Install Visual Studio Build Tools and the Windows SDK through Visual Studio Installer, then rerun setup.cmd. The setup will not install or alter Visual Studio.' }
-    $selected = [string]$matches[0]
-    $devCmd = Join-Path $selected 'Common7\Tools\VsDevCmd.bat'
-    if (-not (Test-Path -LiteralPath $devCmd -PathType Leaf)) { throw "VsDevCmd.bat is missing in '$selected'. Repair that Visual Studio installation using Visual Studio Installer; setup will not modify it." }
-    Write-Log "Loading process-local MSVC environment from $devCmd"
-    $cmdLine = 'call "' + $devCmd + '" -arch=x64 -host_arch=x64 >nul && set'
-    $environment = @(& $env:ComSpec /d /s /c $cmdLine 2>&1)
-    $code = $LASTEXITCODE
-    if ($code -ne 0) { throw "VsDevCmd.bat failed with exit code $code. Repair the existing Visual Studio installation; setup did not modify it." }
-    foreach ($line in $environment) {
-        $text = [string]$line
-        $separator = $text.IndexOf('=')
-        if ($separator -gt 0) { [Environment]::SetEnvironmentVariable($text.Substring(0,$separator),$text.Substring($separator+1),'Process') }
-    }
-    $cl = Get-Command cl.exe -ErrorAction SilentlyContinue
-    if (-not $cl) { throw 'VsDevCmd.bat completed but cl.exe is unavailable. Repair the existing MSVC C++ x64 tools using Visual Studio Installer.' }
-    $compilerVersionText = [Diagnostics.FileVersionInfo]::GetVersionInfo($cl.Source).ProductVersion
-    $compilerVersionMatch = [regex]::Match([string]$compilerVersionText,'\d+\.\d+\.\d+(?:\.\d+)?')
-    $compilerVersion = $null
-    if ($compilerVersionMatch.Success) {
-        $fileVersion = [version]$compilerVersionMatch.Value
-        if ($fileVersion.Major -eq 14) { $compilerVersion = [version]::new(19,$fileVersion.Minor,$fileVersion.Build,$fileVersion.Revision) }
-        else { $compilerVersion = $fileVersion }
-    }
-    if ($null -eq $compilerVersion -or $compilerVersion -lt [version]'19.38') {
-        throw "Unsupported MSVC compiler version '$compilerVersionText'. Use Visual Studio 2022 17.8 or later with MSVC 19.38+, or Visual Studio 2026."
-    }
-    $sdkValue = ([string]$env:WindowsSDKVersion).TrimEnd('\')
-    $sdkMatch = [regex]::Match($sdkValue,'\d+\.\d+\.\d+\.\d+')
-    if (-not $sdkMatch.Success -or [version]$sdkMatch.Value -lt [version]'10.0.22000.0') {
-        throw "Windows 11 SDK 10.0.22000 or later is required; VsDevCmd selected '$sdkValue'. Install a supported SDK in the existing Visual Studio Installer."
-    }
-    Write-Log "MSVC compiler $compilerVersion (file version $compilerVersionText): $($cl.Source); Windows SDK $sdkValue" 'OK'
-}
+. (Join-Path $PSScriptRoot 'visual-studio-2026.ps1')
 
 try {
     Write-Log '=== Project-local development setup ==='
     Assert-WindowsX64
-    Enter-MsvcEnvironment
+    $visualStudioToolchain = Get-VisualStudio2026Toolchain
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     $manifest = Join-Path $root 'tools/versions.json'
     if (-not (Test-Path -LiteralPath $manifest -PathType Leaf)) { throw 'tools/versions.json is missing.' }
@@ -146,7 +108,7 @@ try {
 
     $checker = Join-Path $PSScriptRoot 'check.ps1'
     if (-not (Test-Path -LiteralPath $checker -PathType Leaf)) { throw 'scripts/check.ps1 is missing.' }
-    & $checker -ProjectRoot $root -ToolPaths $toolPaths -LogPath $logPath
+    & $checker -ProjectRoot $root -ToolPaths $toolPaths -LogPath $logPath -VisualStudioToolchain $visualStudioToolchain
     Write-Log '=== Setup completed successfully ===' 'OK'
     Write-Log 'Start work with: code . (after setup completes), then create a feature branch.'
     Write-Log "Full log: $logPath"

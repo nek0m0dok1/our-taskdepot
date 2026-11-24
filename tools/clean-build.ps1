@@ -20,12 +20,13 @@ if ($tracked) {
     throw "Build directory contains Git-tracked files. Aborting."
 }
 
-# Keep the Visual Studio build directory untouched.
+# This moves the complete build tree, including any active VS2026 build, without deleting files.
+# Inspect the destination afterward and only run this when preserving the old tree is intended.
 if (Test-Path -LiteralPath $backup) {
     throw "Backup directory already exists. Aborting."
 }
 
 Move-Item -LiteralPath $target -Destination $backup
 
-Write-Host "Old build directory moved successfully."
-Write-Host "Backup: $backup"
+Write-Host "Build directory moved aside; no files were deleted."
+Write-Host "Preserved backup: $backup"
