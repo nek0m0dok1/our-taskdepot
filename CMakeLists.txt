@@ -30,3 +30,19 @@ include(cmake/Dependencies.cmake)
 if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
+
+# Compilerモジュール
+add_library(compiler STATIC
+  src/compiler/compiler.c
+  src/compiler/compiler_diagnostics.c
+  src/compiler/compiler_process.c
+  src/compiler/compile_task.c
+  src/compiler/workspace.c
+)
+
+# compiler.h の検索場所
+target_include_directories(compiler PUBLIC
+  "${PROJECT_SOURCE_DIR}/include"
+)
+target_compile_options(compiler PRIVATE /utf-8)
+target_link_libraries(compiler PRIVATE ole32)

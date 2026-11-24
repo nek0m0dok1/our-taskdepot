@@ -120,8 +120,9 @@ try {
         if (-not $SkipTidy -and $sourceFiles.Count -gt 0) {
             $tidy = Get-ToolPath 'clang-tidy'
             foreach ($source in @($sourceFiles | Where-Object { $_.Extension -eq '.c' })) {
-                # clang-tidy findings are advisory; a process/internal failure remains fatal.
-                $tidyArgs = @($source.FullName,'--','-x','c','-std=c17')
+                # CMake と同じ場所からプロジェクトの公開ヘッダーを探す。
+                # 警告は参考情報とし、解析自体が失敗したらチェックを止める。
+                $tidyArgs = @($source.FullName,'--','-x','c','-std=c17','-I',(Join-Path $ProjectRoot 'include'))
                 foreach ($includePath in ([string]$env:INCLUDE -split ';' | Where-Object { $_ -and (Test-Path -LiteralPath $_ -PathType Container) })) { $tidyArgs += @('-I',$includePath) }
                 $tidyArgs += @('-I',(Join-Path $buildDir '_deps/cjson-src'),'-I',(Join-Path $buildDir '_deps/unity-src/src'))
                 Invoke-Checked -File $tidy -Arguments $tidyArgs
