@@ -18,6 +18,7 @@ endif()
 # Compilerモジュール
 add_library(compiler STATIC
   src/compiler/compiler.c
+  src/compiler/compile_task.c
   src/compiler/workspace.c
 )
 

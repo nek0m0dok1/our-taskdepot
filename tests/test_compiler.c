@@ -5,10 +5,12 @@
 #include <strsafe.h>
 #include <wchar.h>
 
+#include "compiler/compile_task.h"
 #include "compiler/compiler.h"
 #include "unity.h"
 
 static CompileResult result;
+static CompileTask *task;
 static const wchar_t *fixture;
 static const wchar_t *clang_path;
 
@@ -17,6 +19,8 @@ void setUp(void) {
 }
 
 void tearDown(void) {
+  compile_task_destroy(task);
+  task = NULL;
   if (result.output_path != NULL) {
     compile_output_delete(result.output_path);
   }
@@ -121,6 +125,64 @@ static void test_compile_timeout(void) {
   TEST_ASSERT_FALSE(result.has_exit_code);
   TEST_ASSERT_FALSE(result.cleanup_failed);
   TEST_ASSERT_NULL(result.output_path);
+}
+
+static void test_compile_task_cancel(void) {
+  wchar_t event_name[128];
+  TEST_ASSERT_TRUE(SUCCEEDED(StringCchPrintfW(event_name, _countof(event_name),
+                                              L"Local\\our-taskdepot-compiler-test-%lu",
+                                              GetCurrentProcessId())));
+  HANDLE ready = CreateEventW(NULL, TRUE, FALSE, event_name);
+  TEST_ASSERT_NOT_NULL(ready);
+  TEST_ASSERT_TRUE(SetEnvironmentVariableW(L"TASKDEPOT_TEST_READY", event_name));
+
+  char source[] = "wait";
+  wchar_t *path = _wcsdup(fixture);
+  TEST_ASSERT_NOT_NULL(path);
+  CompileOptions options = {path, 5000};
+  task = compile_task_start(source, &options);
+  memset(path, 0, wcslen(path) * sizeof(*path));
+  free(path);
+  memset(source, 0, sizeof(source));
+  DWORD started = task != NULL ? WaitForSingleObject(ready, 3500) : WAIT_FAILED;
+  CloseHandle(ready);
+  SetEnvironmentVariableW(L"TASKDEPOT_TEST_READY", NULL);
+  TEST_ASSERT_NOT_NULL(task);
+  TEST_ASSERT_EQUAL_UINT32(WAIT_OBJECT_0, started);
+  TEST_ASSERT_FALSE(compile_task_take_result(task, &result));
+
+  compile_task_cancel(task);
+  TEST_ASSERT_EQUAL_UINT32(WAIT_OBJECT_0,
+                           WaitForSingleObject(compile_task_completion_handle(task), 4000));
+  TEST_ASSERT_TRUE(compile_task_take_result(task, &result));
+  TEST_ASSERT_FALSE(compile_task_take_result(task, &result));
+  TEST_ASSERT_EQUAL_INT(COMPILE_CANCELLED, result.status);
+  TEST_ASSERT_FALSE(result.has_exit_code);
+  TEST_ASSERT_FALSE(result.cleanup_failed);
+
+  DWORD child_pid = strtoul(result.diagnostics, NULL, 10);
+  TEST_ASSERT_NOT_EQUAL(0, child_pid);
+  HANDLE child = OpenProcess(SYNCHRONIZE, FALSE, child_pid);
+  DWORD child_status = child != NULL ? WaitForSingleObject(child, 0) : GetLastError();
+  if (child != NULL) {
+    CloseHandle(child);
+    TEST_ASSERT_EQUAL_UINT32(WAIT_OBJECT_0, child_status);
+  } else {
+    TEST_ASSERT_EQUAL_UINT32(ERROR_INVALID_PARAMETER, child_status);
+  }
+}
+
+static void test_compile_task_success(void) {
+  CompileOptions options = {fixture, 0};
+  task = compile_task_start("success", &options);
+  TEST_ASSERT_NOT_NULL(task);
+  TEST_ASSERT_EQUAL_UINT32(WAIT_OBJECT_0,
+                           WaitForSingleObject(compile_task_completion_handle(task), 4000));
+  compile_task_cancel(task);
+  TEST_ASSERT_TRUE(compile_task_take_result(task, &result));
+  assert_success();
+  TEST_ASSERT_EQUAL_INT(0, compile_recover_workspaces());
+  TEST_ASSERT_NOT_EQUAL(INVALID_FILE_ATTRIBUTES, GetFileAttributesW(result.output_path));
 }
 
 static void test_compile_output_delete_failure(void) {
@@ -312,6 +374,8 @@ int wmain(int argc, wchar_t **argv) {
   RUN_TEST(test_compile_invalid_utf8);
   RUN_TEST(test_compile_large_log);
   RUN_TEST(test_compile_timeout);
+  RUN_TEST(test_compile_task_cancel);
+  RUN_TEST(test_compile_task_success);
   RUN_TEST(test_compile_output_delete_failure);
   RUN_TEST(test_compile_recovery_after_directory_delete_failure);
   RUN_TEST(test_compile_recover_abandoned_output);
