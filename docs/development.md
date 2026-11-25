@@ -1,4 +1,6 @@
-# 開発手順
+# 開発ガイド
+
+この文書は、ソースコードを取得してビルド・テストする人向けです。アプリの概要と公開状況は [README](../README.md) を参照してください。
 
 ## 対象環境
 
@@ -9,10 +11,17 @@
 
 ## 初回セットアップ
 
-1. リポジトリをチェックアウトします。
-2. Visual Studio Installer で上記の MSVC と Windows SDK が入っていることを確認します。
-3. エクスプローラーから `setup.cmd` を実行します。
-4. すべての工程が成功したら VS Code でリポジトリを開き、作業ブランチを作成します。
+Visual Studio Installer で上記のコンポーネントを確認してから、PowerShell で次のコマンドを実行します。初回は固定ツールとライブラリを取得するため、インターネット接続が必要です。
+
+```powershell
+git clone https://github.com/nek0m0dok1/our-taskdepot.git
+cd our-taskdepot
+.\setup.cmd
+```
+
+取得には手元にある Git、または [Git for Windows](https://git-scm.com/downloads/win) を使います。pre-commit のフックを登録するには Git のチェックアウトが必要です。学校の PC でツールの導入やスクリプト実行に制限がある場合は、担当教員か管理者に確認してください。
+
+すべての工程が成功したら作業ブランチを作成します。VS Code を使う場合は、このフォルダーを開いて推奨拡張機能を入れてください。
 
 `setup.cmd` は Windows PowerShell 5.1 を起動し、Windows 11 x64、Visual Studio 2026と同梱CMake、MSVC x64、プロジェクト管理ツール、pre-commit、CMake configure/build、CTest、コード形式と clang-tidy の実行を確認します。完了メッセージが出るまで VS Code を開く必要はありません。
 
@@ -53,11 +62,19 @@ VS Code で C/C++ ファイルを保存すると、C/C++ 拡張機能が `.tools
 
 CTest が 0 件の場合も失敗です。構成、ビルド、テストのどれかが失敗したときは setup 全体が失敗します。`.setup/logs/` の該当ログにはコマンド、外部ツールの出力、失敗の詳細が残ります。ログを共有する前に、個人情報が含まれていないか確認してください。
 
+## チームで開発を始める
+
+1. 全員が同じ作業ブランチで `setup.cmd` を実行します。
+2. 成功メッセージとテスト結果を確認し、[チーム確認表](team-checklist.md) に自分の結果を記入します。
+3. 小さな変更で、ブランチ作成からコミット、Pull Request、別のメンバーによるレビューまでを確認します。
+
+変更は Pull Request で共有し、CI とレビューを通して統合します。ブランチ運用は [GitHub ワークフローの ADR](adr/0009-github-workflow.md)、その他の設計判断は [ADR 一覧](adr/) を参照してください。
+
 ## コード品質と CI
 
 clang-format は `.clang-format` に従い、CI では差分を作らない検査モードで実行します。clang-tidy は `clang-analyzer-*` と `bugprone-*` を有効にします。診断警告はレビュー情報として出力し、警告だけでは CI を失敗させません。実行不能、異常終了、内部エラーは CI を失敗させます。
 
-GitHub Actions の workflow は同じ `tools/versions.json` と PowerShell のセットアップ・チェック手順を使う構成です。ホストランナーは Windows Server 2025 のため、CI だけ Windows 11 固有の OS 名チェックを省略しますが、AMD64、既存 MSVC、SDK、ツール、構成、ビルド、CTest の検証を行う設定です。現在の基準コミットでは GitHub Actions は未実行です。ランナーの Visual Studio/SDK の細かなリビジョンは GitHub が管理するため、manifest の固定ツールとは別に記録・確認します。
+GitHub Actions は同じ `tools/versions.json` と PowerShell のセットアップ・チェック手順を使います。ホストランナーは Windows Server 2025 のため、CI では Windows 11 固有の OS 名チェックを省略し、AMD64、MSVC、SDK、ツール、構成、ビルド、CTest を確認します。ランナーの Visual Studio と SDK の細かなリビジョンは GitHub が管理するため、manifest の固定ツールとは別に確認します。
 
 ## 依存物の保管場所とライセンス
 
