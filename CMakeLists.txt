@@ -34,6 +34,8 @@ endif()
 add_executable(taskdepot_gui WIN32 src/main.c resources/app.rc)
 target_compile_options(taskdepot_gui PRIVATE $<$<COMPILE_LANGUAGE:C>:/utf-8>)
 target_link_libraries(taskdepot_gui PRIVATE user32)
+set_property(TARGET taskdepot_gui PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+install(TARGETS taskdepot_gui RUNTIME DESTINATION . COMPONENT Taskdepot)
 
 # Compilerモジュール
 add_library(compiler STATIC
