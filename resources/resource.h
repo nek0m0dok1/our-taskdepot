@@ -1,0 +1,14 @@
+#ifndef TASKDEPOT_RESOURCE_H
+#define TASKDEPOT_RESOURCE_H
+
+#define IDD_MAIN 100
+#define IDC_SOURCE 101
+#define IDC_RESULT 102
+#define IDC_RUN 103
+#define IDC_OPEN_SOURCE 104
+#define IDC_SAVE 105
+#define IDC_REPOSITORY 106
+#define IDC_THEME 107
+#define IDC_COPY_RESULT 108
+
+#endif
