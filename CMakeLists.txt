@@ -31,6 +31,10 @@ if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
+add_executable(taskdepot_gui WIN32 src/main.c resources/app.rc)
+target_compile_options(taskdepot_gui PRIVATE $<$<COMPILE_LANGUAGE:C>:/utf-8>)
+target_link_libraries(taskdepot_gui PRIVATE user32)
+
 # Compilerモジュール
 add_library(compiler STATIC
   src/compiler/compiler.c
