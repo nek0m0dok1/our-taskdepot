@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="CErrorGUI.vcxproj" Id="acbb3efe-494d-436b-b367-884ff555226c" />
+</Solution>
