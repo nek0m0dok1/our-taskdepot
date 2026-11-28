@@ -62,6 +62,20 @@ VS Code で C/C++ ファイルを保存すると、C/C++ 拡張機能が `.tools
 
 CTest が 0 件の場合も失敗です。構成、ビルド、テストのどれかが失敗したときは setup 全体が失敗します。`.setup/logs/` の該当ログにはコマンド、外部ツールの出力、失敗の詳細が残ります。ログを共有する前に、個人情報が含まれていないか確認してください。
 
+## コンパイラを含む配布 ZIP の作成
+
+`setup.cmd` を完了し、CMake 4.2 以降が使える PowerShell で実行します。
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\package.ps1
+```
+
+既定の `build/` を Release 構成でビルドし、`out/our-taskdepot-win-x64.zip` を作成します。別の構成済みビルドディレクトリを使う場合は `-BuildDir` を指定します。ZIP がすでにある場合は先に移動してください。
+
+パッケージ作成時は、セットアップが保存した LLVM-MinGW UCRT x64 の ZIP を `tools/versions.json` の SHA-256 と照合します。配布 ZIP を展開すると、`taskdepot_gui.exe` の隣に `compiler/bin/clang.exe` があり、ツールチェーンのヘッダー、ライブラリ、上流のライセンス文書も `compiler/` に入ります。利用者は ZIP の内容をまとめて展開してください。
+
+2026-11-27 の検証では、Windows 11 x64 で Release ビルド、同梱の Clang 23.1.4 による C23 のコンパイル・リンク・実行、UTF-8 エラー診断を確認しました。Visual Studio のない別の Windows 11 PC での起動と、公開配布に必要な再配布条件の確認は未実施です。
+
 ## チームで開発を始める
 
 1. 全員が同じ作業ブランチで `setup.cmd` を実行します。
@@ -78,7 +92,7 @@ GitHub Actions は同じ `tools/versions.json` と PowerShell のセットアッ
 
 ## 依存物の保管場所とライセンス
 
-Scintilla の `Scintilla.dll` は `.tools/scintilla/wscite/Scintilla.dll` に展開します。LLVM-MinGW は利用者コードの検証専用で、アプリ本体の MSVC ビルドとは独立しています。cJSON と Unity は `tools/versions.json` の `libraries` の固定版を CMake FetchContent が SHA-256 検証して取得します。
+Scintilla の `Scintilla.dll` は `.tools/scintilla/wscite/Scintilla.dll` に展開します。LLVM-MinGW は利用者コードのコンパイルと検証に使い、アプリ本体の MSVC ビルドとは独立しています。cJSON と Unity は `tools/versions.json` の `libraries` の固定版を CMake FetchContent が SHA-256 検証して取得します。
 
 Python は Astral の `python-build-standalone` 専用展開物を `.tools/python/` に置きます。Python 本体の PSF License と配布プロジェクトのライセンス文書は、取得物のライセンス資料および [python-build-standalone](https://github.com/astral-sh/python-build-standalone) を参照してください。clang-format / clang-tidy は PyPI の Windows wheel を個別に SHA-256 検証し、展開後の実行ファイルを検証します。これらの開発ツールはアプリへ同梱しません。配布物のライセンス・再配布条件は [third-party-notices.md](third-party-notices.md) に記録します。
 

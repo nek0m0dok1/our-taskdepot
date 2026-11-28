@@ -84,6 +84,11 @@ TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE
 OR PERFORMANCE OF THIS SOFTWARE.
 ```
 
+## LLVM-MinGW UCRT x64 (20261020)
+
+- The package includes the [upstream release](https://github.com/mstorsjo/llvm-mingw/releases/tag/20261020) under `compiler/`, with its original license and copyright files. The archive URL and SHA-256 are pinned in `tools/versions.json`.
+- Review the terms for each bundled component, including any corresponding source requirements, before public redistribution.
+
 ## Development tools
 
 Versions, official download URLs, checksums, and provenance for tools are maintained in `tools/versions.json`. Refer to each upstream license before redistributing any tool binary; tools provisioned only for local development are not automatically application dependencies.
